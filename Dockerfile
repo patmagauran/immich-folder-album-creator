@@ -1,7 +1,7 @@
 FROM python:3.12-alpine
 LABEL maintainer="Patrick Magauran"
 
-COPY immich_auto_tag.py requirements.txt docker/immich_auto_album.sh docker/setup_cron.sh /script/
+COPY immich_auto_tag.py requirements.txt docker/immich_auto_tag.sh docker/setup_cron.sh /script/
 ARG TARGETPLATFORM
 # gcc and musl-dev are required for building requirements for regex python module
 RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then apk add gcc musl-dev; fi \

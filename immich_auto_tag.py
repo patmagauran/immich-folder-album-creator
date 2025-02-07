@@ -573,7 +573,6 @@ def add_assets_to_tag(assets_add_tag_id: str, asset_list: list[str]) -> list[str
     asset_list_added = []
     for assets_chunk in assets_chunked:
         data = {'ids':assets_chunk}
-        print(data)
         r = requests.put(root_url+api_endpoint+f'/{assets_add_tag_id}/assets', json=data, **requests_kwargs, timeout=api_timeout)
         check_api_response(r)
         response = r.json()
