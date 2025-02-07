@@ -1,3 +1,8 @@
+# THIS IS A WIP FORK OF [immich-folder-album-creator](https://github.com/Salvoxia/immich-folder-album-creator) to support Tags. THE README IS NOT YET UPDATED
+
+
+
+
 [![Build Status](https://github.com/salvoxia/immich-folder-album-creator/workflows/CI/badge.svg)](https://github.com/Salvoxia/immich-folder-album-creator/actions/workflows/ci.yaml)
 [![Build Status](https://github.com/salvoxia/immich-folder-album-creator/workflows/build-image/badge.svg)](https://github.com/Salvoxia/immich-folder-album-creator/actions/workflows/build-image.yaml)
 [![Docker][docker-image]][docker-url]
@@ -17,6 +22,7 @@ __Current compatibility:__ Immich v1.106.1 - v1.125.x
 This script is mostly based on the following original script: [REDVM/immich_auto_album.py](https://gist.github.com/REDVM/d8b3830b2802db881f5b59033cf35702)
 
 ## Table of Contents
+- [THIS IS A WIP FORK OF immich-folder-album-creator to support Tags. THE README IS NOT YET UPDATED](#this-is-a-wip-fork-of-immich-folder-album-creator-to-support-tags-the-readme-is-not-yet-updated)
 - [Immich Folder Album Creator](#immich-folder-album-creator)
     - [Disclaimer](#disclaimer)
   - [Table of Contents](#table-of-contents)
