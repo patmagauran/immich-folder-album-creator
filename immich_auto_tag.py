@@ -18,15 +18,12 @@ from typing import Tuple
 import argparse
 import logging
 import sys
-import fnmatch
 import os
 import datetime
 from collections import defaultdict, OrderedDict
-import random
 from urllib.error import HTTPError
 
 import regex
-import yaml
 
 import urllib3
 import requests
@@ -352,6 +349,24 @@ def create_tag_name(asset_path_chunks: list[str], tag_name_postprocess_regex: li
     return tag_name.strip()
 
 def build_tag_list(asset_list : list[dict], root_path_list : list[str], base_tag_list : list[str]) -> dict:
+    """
+    Builds a list of tags and their assets.
+    Returns a dict where the key is the tag name and the value is list of assets.
+    Attention!
+
+    Parameters
+    ----------
+        asset_list : list[dict]
+            List of assets dictionaries fetched from Immich API
+        root_path_list : list[str]
+            List of root paths to use for album creation
+        base_tag_list: list[str]
+            list of base tag names to use corresponding to the root paths
+
+    Returns
+    ---------
+        A dict with tag names as keys and asset ids as values
+    """
     tag_dict = defaultdict(list)
     base_tag = ""
     for asset_to_add in asset_list:
@@ -364,11 +379,10 @@ def build_tag_list(asset_list : list[dict], root_path_list : list[str], base_tag
         asset_root_path = identify_root_path(asset_path, root_path_list)
         if not asset_root_path:
             continue
-        if (len(base_tag_list) == 1):
+        if len(base_tag_list) == 1:
             base_tag = base_tag_list[0].strip()
-        elif (len(base_tag_list) > 1):
+        elif len(base_tag_list) > 1:
             base_tag = base_tag_list[root_path_list.index(asset_root_path)].strip()
-            
         # Chunks of the asset's path below root_path
         path_chunks = asset_path.replace(asset_root_path, '').split('/')
         # A single chunk means it's just the image file in no sub folder, ignore
@@ -384,9 +398,9 @@ def build_tag_list(asset_list : list[dict], root_path_list : list[str], base_tag
             if 'tags' in asset_to_add:
                 for tag in asset_to_add['tags']:
                     if 'value' in tag and tag['value'] == tag_name:
-                            should_add_asset = False
-            if should_add_asset:            
-                if (tag_name in tag_dict):
+                        should_add_asset = False
+            if should_add_asset:
+                if tag_name in tag_dict:
                     tag_dict[tag_name].append(asset_to_add['id'])
                 else:
                     tag_dict[tag_name] = [asset_to_add['id']]
@@ -394,8 +408,6 @@ def build_tag_list(asset_list : list[dict], root_path_list : list[str], base_tag
             logging.warning("Got empty tag name for asset path %s, check your tag_level settings!", asset_path)
 
     return tag_dict
-
-"""API CALLS AND CHECKS"""
 
 def check_api_response(response: requests.Response):
     """
@@ -822,22 +834,21 @@ logging.info("Creating tags if needed")
 created_tags = []
 # List for gathering all asset UUIDs for later archiving
 asset_uuids_added = []
-for tag in tags_to_create.keys():
-    tag_id = -1
-    if not tag in tag_to_id:
+for tag_to_create, tag_assets in tags_to_create.items():
+    if not tag_to_create in tag_to_id:
         # Create tag
-        tag_id = create_tag(tag)
-        tag_to_id[tag] = tag_id
-        created_tags.append(tag)
-        logging.info('tag %s added!', tag)
+        tag_id = create_tag(tag_to_create)
+        tag_to_id[tag_to_create] = tag_id
+        created_tags.append(tag_to_create)
+        logging.info('tag %s added!', tag_to_create)
     else:
-        tag_id = tag_to_id[tag]
+        tag_id = tag_to_id[tag_to_create]
 
-    logging.info("Adding assets to tag %s", tag)
-    assets_added = add_assets_to_tag(tag_id, tags_to_create[tag])
+    logging.info("Adding assets to tag %s", tag_to_create)
+    assets_added = add_assets_to_tag(tag_id, tag_assets)
     if len(assets_added) > 0:
         asset_uuids_added += assets_added
-        logging.info("%d new assets added to %s", len(assets_added), tag)
+        logging.info("%d new assets added to %s", len(assets_added), tag_to_create)
 
 logging.info("%d tags created", len(created_tags))
 logging.info("Done!")
