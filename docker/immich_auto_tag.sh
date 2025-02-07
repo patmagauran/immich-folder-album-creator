@@ -15,18 +15,21 @@ for path in ${ROOT_PATH}; do
     additional_root_paths="--root-path \"$path\" $additional_root_paths"
   fi
 done
+
+base_tag_list=""
+if [ ! -z "$BASE_TAG" ]; then
+    for base_tag_entry in ${BASE_TAG}; do
+        base_tag_list="--base-tag \"$base_tag_entry\" $base_tag_list"
+    done
+fi
+
+
 IFS=$oldIFS
 
 # parse semicolon separated root paths and wrap in quotes
 oldIFS=$IFS
 IFS=':'
-# parse  SHARE_WITH CSV
-share_with_list=""
-if [ ! -z "$SHARE_WITH" ]; then
-    for share_user in ${SHARE_WITH}; do
-        share_with_list="--share-with \"$share_user\" $share_with_list"
-    done
-fi
+
 
 # parse PATH_FILTER CSV
 path_filter_list=""
@@ -47,19 +50,19 @@ fi
 ## parse ABLUM_NAME_POST_REGEX<n>
 # Split on newline only
 IFS=$(echo -en "\n\b")
-album_name_post_regex_list=""
+tag_name_post_regex_list=""
 # Support up to 10 regex patterns
 regex_max=10
 for regex_no in `seq 1 $regex_max`
 do
     for entry in `env`
     do
-        # check if env variable name begins with ALBUM_POST_NAME_REGEX followed by a the current regex no and and equal sign
-        pattern=$(echo "^ALBUM_NAME_POST_REGEX${regex_no}+=.+")
+        # check if env variable name begins with tag_POST_NAME_REGEX followed by a the current regex no and and equal sign
+        pattern=$(echo "^tag_NAME_POST_REGEX${regex_no}+=.+")
         TEST=$(echo "${entry}" | grep -E "$pattern")
         if [ ! -z "${TEST}" ]; then
             value="${entry#*=}" # select everything after the first `=`
-            album_name_post_regex_list="$album_name_post_regex_list --album-name-post-regex $value"
+            tag_name_post_regex_list="$tag_name_post_regex_list --tag-name-post-regex $value"
         fi
     done
 done
@@ -89,16 +92,16 @@ if [ ! -z "$additional_root_paths" ]; then
     args="$additional_root_paths $args"
 fi
 
-if [ ! -z "$ALBUM_LEVELS" ]; then
-    args="--album-levels $ALBUM_LEVELS $args"
+if [ ! -z "$base_tag_list"]; then
+    args="$base_tag_list $args"
 fi
 
-if [ ! -z "$ALBUM_SEPARATOR" ]; then
-    args="--album-separator \"$ALBUM_SEPARATOR\" $args"
+if [ ! -z "$tag_LEVELS" ]; then
+    args="--tag-levels $tag_LEVELS $args"
 fi
 
-if [ ! -z "$album_name_post_regex_list" ]; then
-    args="$album_name_post_regex_list $args"
+if [ ! -z "$tag_name_post_regex_list" ]; then
+    args="$tag_name_post_regex_list $args"
 fi
 
 if [ ! -z "$FETCH_CHUNK_SIZE" ]; then
@@ -125,63 +128,14 @@ if [ ! -z "$MODE" ]; then
     args="--mode \"$MODE\" $args"
 fi
 
-if [ ! -z "$DELETE_CONFIRM" ]; then
-    args="--delete-confirm $args"
-fi
-
-if [ ! -z "$share_with_list" ]; then
-    args="$share_with_list $args"
-fi
-
-if [ ! -z "$SHARE_ROLE" ]; then
-    args="--share-role $SHARE_ROLE $args"
-fi
-
-if [ ! -z "$SYNC_MODE" ]; then
-    args="--sync-mode $SYNC_MODE $args"
-fi
-
-if [ ! -z "$ALBUM_ORDER" ]; then
-    args="--album-order $ALBUM_ORDER $args"
-fi
-
-if [ ! -z "$FIND_ASSETS_IN_ALBUMS" ]; then
-    args="--find-assets-in-albums $args"
-fi
-
-if [ ! -z "$FIND_ARCHIVED_ASSETS" ]; then
-    args="--find-archived-assets $args"
-fi
 
 if [ ! -z "$path_filter_list" ]; then
     args="$path_filter_list $args"
-fi
-
-if [ ! -z "$SET_ALBUM_THUMBNAIL" ]; then
-    args="--set-album-thumbnail \"$SET_ALBUM_THUMBNAIL\" $args"
-fi
-
-if [ ! -z "$ARCHIVE" ]; then
-    args="--archive $args"
-fi
-
-if [ ! -z "$READ_ALBUM_PROPERTIES" ]; then
-    args="--read-album-properties $args"
 fi
 
 if [ ! -z "$API_TIMEOUT" ]; then
     args="--api-timeout \"$API_TIMEOUT\" $args"
 fi
 
-if [ "$COMMENTS_AND_LIKES" == "1" ]; then
-    args="--comments-and-likes-enabled $args"
-elif [ "$COMMENTS_AND_LIKES" == "0" ]; then
-    args="--comments-and-likes-disabled $args"
-fi
-
-if [ ! -z "$UPDATE_ALBUM_PROPS_MODE" ]; then
-    args="--update-album-props-mode $UPDATE_ALBUM_PROPS_MODE $args"
-fi
-
 BASEDIR=$(dirname "$0")
-echo $args | xargs python3 -u $BASEDIR/immich_auto_album.py
+echo $args | xargs python3 -u $BASEDIR/immich_auto_tag.py
